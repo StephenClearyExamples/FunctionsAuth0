@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -11,41 +13,36 @@ using Microsoft.IdentityModel.Tokens;
 
 public sealed class Auth0Authenticator
 {
-    private readonly string _auth0domain;
-    private readonly string _audience;
-    private readonly string _clientId;
+    private readonly TokenValidationParameters _parameters;
     private readonly ConfigurationManager<OpenIdConnectConfiguration> _manager;
     private readonly JwtSecurityTokenHandler _handler;
 
-    public Auth0Authenticator(string auth0Domain, string audience, string clientId)
+    public Auth0Authenticator(string auth0Domain, IEnumerable<string> audiences)
     {
-        _auth0domain = auth0Domain;
-        _audience = audience;
-        _clientId = clientId;
+        _parameters = new TokenValidationParameters
+        {
+            ValidIssuer = $"https://{auth0Domain}/",
+            ValidAudiences = audiences.ToArray(),
+            ValidateIssuerSigningKey = true,
+        };
         _manager = new ConfigurationManager<OpenIdConnectConfiguration>($"https://{auth0Domain}/.well-known/openid-configuration", new OpenIdConnectConfigurationRetriever());
         _handler = new JwtSecurityTokenHandler();
     }
 
-    public async Task<ClaimsPrincipal> AuthenticateAsync(string token, CancellationToken cancellationToken = new CancellationToken())
+    public async Task<(ClaimsPrincipal User, SecurityToken ValidatedToken)> AuthenticateAsync(string token, CancellationToken cancellationToken = new CancellationToken())
     {
         // Note: ConfigurationManager<T> has an automatic refresh interval of 1 day.
-        //   The config is cached in-between refreshes, so this call actually completes synchronously unless it needs to refresh.
+        //   The config is cached in-between refreshes, so this "asynchronous" call actually completes synchronously unless it needs to refresh.
         var config = await _manager.GetConfigurationAsync(cancellationToken).ConfigureAwait(false);
-        var validationParameters = new TokenValidationParameters
-        {
-            ValidIssuer = $"https://{_auth0domain}/",
-            ValidAudiences = new [] { _audience, _clientId },
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKeys = config.SigningKeys,
-        };
-        var user = _handler.ValidateToken(token, validationParameters, out var _);
-        return user;
+        _parameters.IssuerSigningKeys = config.SigningKeys;
+        var user = _handler.ValidateToken(token, _parameters, out var validatedToken);
+        return (user, validatedToken);
     }
 }
 
 public static class Auth0AuthenticatorExtensions
 {
-    public static async Task<ClaimsPrincipal> AuthenticateAsync(this Auth0Authenticator @this, AuthenticationHeaderValue header,
+    public static async Task<(ClaimsPrincipal User, SecurityToken ValidatedToken)> AuthenticateAsync(this Auth0Authenticator @this, AuthenticationHeaderValue header,
         CancellationToken cancellationToken = new CancellationToken())
     {
         if (header == null || !string.Equals(header.Scheme, "Bearer", StringComparison.InvariantCultureIgnoreCase))
@@ -53,7 +50,7 @@ public static class Auth0AuthenticatorExtensions
         return await @this.AuthenticateAsync(header.Parameter, cancellationToken);
     }
 
-    public static Task<ClaimsPrincipal> AuthenticateAsync(this Auth0Authenticator @this, HttpRequestMessage request,
+    public static Task<(ClaimsPrincipal User, SecurityToken ValidatedToken)> AuthenticateAsync(this Auth0Authenticator @this, HttpRequestMessage request,
         CancellationToken cancellationToken = new CancellationToken()) =>
         @this.AuthenticateAsync(request.Headers.Authorization, cancellationToken);
 }

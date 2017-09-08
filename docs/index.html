@@ -23,22 +23,24 @@
         var AUTH0_CALLBACK_URL = 'https://stephenclearyexamples.github.io/FunctionsAuth0/'; // Copied from GH Pages settings on GitHub.
         var FUNCTIONS_URL = 'https://stephenclearyauth0.azurewebsites.net/'; // Copied from Azure Functions settings.
 
-        var access_token; // Normally would be stored in local storage; this simple example just uses a var so you logout when you refresh.
+        var access_token, id_token; // Normally would be stored in local storage; this simple example just uses vars so you logout when you refresh.
 
         $('document').ready(function() {
             var webAuth = new auth0.WebAuth({
-                domain: AUTH0_DOMAIN,
-                clientID: AUTH0_CLIENT_ID,
-                redirectUri: AUTH0_CALLBACK_URL,
-                responseType: 'id_token',
-                scope: 'openid profile email'
+                domain: AUTH0_DOMAIN, // which Auth0 account this we authenticate with
+                clientID: AUTH0_CLIENT_ID, // this web page's client id (the audience for the id_token)
+                audience: FUNCTIONS_URL, // the API's identifier (the audience for the access_token)
+                redirectUri: AUTH0_CALLBACK_URL, // where the authentication will return to - in this example, it returns to this same page
+                responseType: 'token id_token', // request both access_token ("token") and id_token
+                scope: 'openid profile email' // include common properties
             });
 
-            // Display our current login status; if there's an access token in the URL hash, then we've been logged in.
+            // Display our current login status; if there's a tokens in the URL hash, then we've been logged in.
             webAuth.parseHash(function(err, authResult) {
-                if (authResult && authResult.idToken) {
+                if (authResult && authResult.accessToken && authResult.idToken) {
                     window.location.hash = '';
-                    access_token = authResult.idToken;
+                    access_token = authResult.accessToken;
+                    id_token = authResult.idToken;
                     $('#results').append('<div>Logged in!</div>');
                 } else if (err) {
                     console.log(err);
@@ -59,8 +61,16 @@
             $('#btn-call').click(function(e) {
                 e.preventDefault();
                 var headers = new Headers();
-                if (access_token) {
+                if (access_token && id_token) {
+                    // The access_token is the appropriate way to authenticate with the API.
                     headers.append('Authorization', 'Bearer ' + access_token);
+
+                    // But the id_token has tons of useful info (e.g., email address). So we send that along, too.
+                    // This technique is appropriate ***IF AND ONLY IF*** you control the client's private key.
+                    // If you have clients with their own keys, then you should *only* take the access_token in your API and then
+                    //   use the access_token to call https://%AUTH0_DOMAIN%/userinfo to get the additional info.
+                    // This example has a client under our control, so we just pass id_token directly to the API to avoid the extra call.
+                    headers.append('X-Id-Token', id_token); // 'X-Id-Token' isn't any kind of standard or common practice; it's just something I made up.
                 }
                 fetch(FUNCTIONS_URL + 'api/hello', { headers: headers })
                     .then(function (response) {
