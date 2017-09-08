@@ -44,12 +44,12 @@
                 if (authResult && authResult.accessToken) {
                     window.location.hash = '';
                     access_token = authResult.access_token;
-                    $('#results').append('Logged in!');
+                    $('#results').append('<div>Logged in!</div>');
                 } else if (err) {
                     console.log(err);
-                    $('#results').append('Error ' + err.error);
+                    $('#results').append('<div>Error ' + err.error + '</div>');
                 } else {
-                    $('#results').append('Not logged in.');
+                    $('#results').append('<div>Not logged in.</div>');
                 }
             });
         });
