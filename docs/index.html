@@ -29,7 +29,7 @@
             var webAuth = new auth0.WebAuth({
                 domain: AUTH0_DOMAIN,
                 clientID: AUTH0_CLIENT_ID,
-                audience: 'https://' + AUTH0_DOMAIN + '/userinfo',
+                audience: FUNCTIONS_URL,
                 redirectUri: AUTH0_CALLBACK_URL,
                 responseType: 'token',
                 scope: 'openid'
