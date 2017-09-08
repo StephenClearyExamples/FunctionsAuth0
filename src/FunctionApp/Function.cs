@@ -25,17 +25,15 @@ namespace FunctionApp
                 // Dump the claims details in the user
                 foreach (var identity in user.Identities)
                 {
-                    log.Info("User authenticated as " + identity.Name);
+                    log.Info("User authenticated");
                     foreach (var claim in identity.Claims)
                         log.Info($"Claim `{claim.Type}` is `{claim.Value}`");
                 }
 
                 // Return the user details to the calling app.
-                var result = user.Identities.Select(x => new
-                {
-                    name = x.Name,
-                    claims = x.Claims.Select(c => new { type = c.Type, value = c.Value }).ToList(),
-                }).ToList();
+                var result = user.Identities.Select(x =>
+                    x.Claims.Select(c => new { type = c.Type, value = c.Value }).ToList()
+                ).ToList();
                 return req.CreateResponse(HttpStatusCode.OK, result);
             }
             catch (ExpectedException ex)
