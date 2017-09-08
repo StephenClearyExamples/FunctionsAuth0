@@ -16,7 +16,7 @@ Click the "Call API" button. The SPA will send a request without the `Authorizat
 
 Click the "Login" button. The SPA will redirect to an Auth0-hosted login page, where you can authorize using social media accounts.
 
-> Note: There are lots of options on how to log someone in via Auth0. It doesn't have to be an Auth0-hosted login page, and in fact most SPAs will not chose this option.
+> Note: There are lots of options on how to log someone in via Auth0. It doesn't have to be an Auth0-hosted login page, and in fact most SPAs would not chose this option; they would use [Lock](https://auth0.com/docs/libraries/lock) instead.
 
 The Auth0 login redirects back to the SPA, this time appending user authentication information in the URL hash.
 
@@ -47,6 +47,14 @@ This behaves as follows:
 You can then examine the claims and take action accordingly. This sample Azure Function just returns the claims for each identity as JSON.
 
 If there are any authentication errors at all, an exception is raised (and logged), and the Azure Function returns a `403`.
+
+# More Info
+
+The SPA and Azure Function authentication flow follows https://auth0.com/docs/api-auth/grant/implicit
+
+The SPA uses a simplified version of https://auth0.com/docs/quickstart/spa/jquery (in this simple example, there is no saving of tokens, no logout, no profile or scope handling, and no token renewal).
+
+The Azure Functions side was a bit harder, since the Auth0 docs assume you're running on ASP.NET (with the capability to configure the OWIN authentication middleware). Since that's not true in the Azure Functions world, I had to take cues from the [general Auth0 API docs](https://auth0.com/docs/api-auth/tutorials/verify-access-token). The [manually validate JWT on .NET example](https://github.com/auth0-samples/auth0-dotnet-validate-jwt/tree/master/IdentityModel-RS256) was much more helpful. Finally, I used the [Auth0 Python API quickstart](https://auth0.com/docs/quickstart/backend/python) to determine the correct handling of the `Authorization` header.
 
 # How to Set It Up with Your Own Accounts
 
