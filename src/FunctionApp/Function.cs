@@ -20,7 +20,15 @@ namespace FunctionApp
 
                 var user = await req.AuthenticateAsync(log);
 
-                return req.CreateResponse(HttpStatusCode.OK, "You're in!");
+                log.Info("User authenticated as " + user.Identity.Name);
+
+                foreach (var claim in user.Claims)
+                    log.Info($"Claim `{claim.Type}` is `{claim.Value}`");
+
+                // Return the user details to the calling app.
+                var result = string.Join("\n", user.Claims.Select(x => $"Claim `{x.Type}` is `{x.Value}`"));
+
+                return req.CreateResponse(HttpStatusCode.OK, result);
             }
             catch (ExpectedException ex)
             {
