@@ -59,7 +59,11 @@
             // The api button calls our Azure Functions API and displays the results.
             $('#btn-call').click(function(e) {
                 e.preventDefault();
-                fetch(FUNCTIONS_URL + 'api/hello')
+                var headers = new Headers();
+                if (access_token) {
+                    headers.append('Authorization', 'Bearer ' + access_token);
+                }
+                fetch(FUNCTIONS_URL + 'api/hello', { headers: headers })
                     .then(function (response) {
                         console.log(response);
                         if (response.ok) {
