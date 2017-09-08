@@ -3,6 +3,14 @@
 <head>
   <meta charset="utf-8">
   <title>Auth0 for Azure Functions!</title>
+  <style>
+      table {
+          border: 1px;
+      }
+      td {
+          padding: 7px;
+      }
+  </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script src="https://cdn.auth0.com/js/auth0/8.8/auth0.min.js"></script>
@@ -77,8 +85,18 @@
                         console.log(response);
                         if (response.ok) {
                             $('#results').append('<div>API called OK!</div>');
-                            response.text().then(function (result) {
-                                $('#results').append($('<div/>').text(result));
+                            response.json().then(function (results) {
+                                console.log(results);
+                                results.forEach(function (token) {
+                                    var table = $('<table/>');
+                                    token.forEach(function (claim) {
+                                        var tr = $('<tr/>');
+                                        tr.append($('<td/>').text(claim.type));
+                                        tr.append($('<td/>').text(claim.value));
+                                        table.append(tr);
+                                    });
+                                    $('#results').append(table);
+                                });
                             });
                         } else {
                             $('#results').append('<div>API call failed</div>');
