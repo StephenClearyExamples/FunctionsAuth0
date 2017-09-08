@@ -20,7 +20,7 @@ public sealed class Auth0Authenticator
     {
         _auth0domain = auth0Domain;
         _audience = audience;
-        _manager = new ConfigurationManager<OpenIdConnectConfiguration>($"{auth0Domain}.well-known/openid-configuration", new OpenIdConnectConfigurationRetriever());
+        _manager = new ConfigurationManager<OpenIdConnectConfiguration>($"https://{auth0Domain}/.well-known/openid-configuration", new OpenIdConnectConfigurationRetriever());
         _handler = new JwtSecurityTokenHandler();
     }
 
