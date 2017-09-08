@@ -16,7 +16,7 @@ Click the "Call API" button. The SPA will send a request without the `Authorizat
 
 Click the "Login" button. The SPA will redirect to an Auth0-hosted login page, where you can authorize using social media accounts.
 
-> Note: There are lots of options on how to log someone in via Auth0. It doesn't have to be an Auth0-hosted login page, and in fact most SPAs would not chose this option; they would use [Lock](https://auth0.com/docs/libraries/lock) instead.
+> Note: There are lots of options on how to log someone in via Auth0. It doesn't have to be an Auth0-hosted login page. In particular, SPAs may choose to use [Lock](https://auth0.com/docs/libraries/lock) instead.
 
 The Auth0 login redirects back to the SPA, this time appending user authentication information in the URL hash.
 
