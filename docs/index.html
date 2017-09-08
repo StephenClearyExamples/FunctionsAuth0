@@ -32,7 +32,7 @@
                 audience: FUNCTIONS_URL,
                 redirectUri: AUTH0_CALLBACK_URL,
                 responseType: 'token',
-                scope: 'openid'
+                scope: 'openid profile email'
             });
 
             // Display our current login status; if there's an access token in the URL hash, then we've been logged in.
