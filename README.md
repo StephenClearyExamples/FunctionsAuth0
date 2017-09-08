@@ -24,7 +24,7 @@ The SPA loads and sees the authentication information in the URL hash. The `pars
 
 Click the "Call API" button. The SPA will send a request with the `access_token` in the `Authorization` header and the `id_token` in the `X-Additional-Token` header.
 
-> Note: You may not want to pass the `id_token` to your backend. It makes sense to do so only if you own the client (i.e., you control the client's secret key on Auth0).
+> Note: You may not want to pass the `id_token` to your backend. It makes sense to do so only if you own the client (i.e., you control the client's secret key on Auth0). In other words, your SPA and backend are one logical unit. If you are writing an API that others can use, then you do *not* want to pass `id_token` to the backend.
 
 The Azure Function will authorize the user and return the details of the claims it can see in those token(s).
 
