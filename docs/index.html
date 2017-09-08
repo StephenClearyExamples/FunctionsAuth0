@@ -29,17 +29,16 @@
             var webAuth = new auth0.WebAuth({
                 domain: AUTH0_DOMAIN,
                 clientID: AUTH0_CLIENT_ID,
-                audience: FUNCTIONS_URL,
                 redirectUri: AUTH0_CALLBACK_URL,
-                responseType: 'id_token token',
+                responseType: 'id_token',
                 scope: 'openid profile email'
             });
 
             // Display our current login status; if there's an access token in the URL hash, then we've been logged in.
             webAuth.parseHash(function(err, authResult) {
-                if (authResult && authResult.accessToken) {
+                if (authResult && authResult.idToken) {
                     window.location.hash = '';
-                    access_token = authResult.accessToken;
+                    access_token = authResult.idToken;
                     $('#results').append('<div>Logged in!</div>');
                 } else if (err) {
                     console.log(err);
