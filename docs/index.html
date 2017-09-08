@@ -17,11 +17,13 @@
     </div>
 
     <script>
-        $('document').ready(function() {
-            var AUTH0_DOMAIN = 'stephenclearytba.auth0.com'; // Copied from client settings on Auth0 dashboard.
-            var AUTH0_CLIENT_ID = 'H21JFEgGqDy6cyrkD5WvnzfFnJ1iTgDr'; // Copied from client settings on Auth0 dashboard.
-            var AUTH0_CALLBACK_URL = 'https://stephenclearyexamples.github.io/FunctionsAuth0/'; // Copied from GH Pages settings on GitHub.
+        var AUTH0_DOMAIN = 'stephenclearytba.auth0.com'; // Copied from client settings on Auth0 dashboard.
+        var AUTH0_CLIENT_ID = 'H21JFEgGqDy6cyrkD5WvnzfFnJ1iTgDr'; // Copied from client settings on Auth0 dashboard.
+        var AUTH0_CALLBACK_URL = 'https://stephenclearyexamples.github.io/FunctionsAuth0/'; // Copied from GH Pages settings on GitHub.
 
+        var access_token; // Normally would be stored in local storage; this simple example just uses a var so you logout when you refresh.
+
+        $('document').ready(function() {
             var webAuth = new auth0.WebAuth({
                 domain: AUTH0_DOMAIN,
                 clientID: AUTH0_CLIENT_ID,
@@ -36,6 +38,19 @@
             loginBtn.click(function(e) {
                 e.preventDefault();
                 webAuth.authorize();
+            });
+
+            webAuth.parseHash(function(err, authResult) {
+                if (authResult && authResult.accessToken) {
+                    window.location.hash = '';
+                    access_token = authResult.access_token;
+                    $('#results').append('Logged in!');
+                } else if (err) {
+                    console.log(err);
+                    $('#results').append('Error ' + err.error);
+                } else {
+                    $('#results').append('Not logged in.');
+                }
             });
         });
     </script>
