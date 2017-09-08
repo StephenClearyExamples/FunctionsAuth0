@@ -16,11 +16,13 @@ Click the "Call API" button. The SPA will send a request without the `Authorizat
 
 Click the "Login" button. The SPA will redirect to an Auth0-hosted login page, where you can authorize using social media accounts.
 
-> Note: There are lots of options on how to log someone in via Auth0. It doesn't have to be an Auth0-hosted login page, SPAs may prefer to use [Lock](https://auth0.com/docs/libraries/lock) instead.
+> Note: There are lots of options on how to log someone in via Auth0. It doesn't have to be an Auth0-hosted login page. In particular, SPAs may choose to use [Lock](https://auth0.com/docs/libraries/lock) instead.
 
-The Auth0 login redirects back to the SPA, this time appending user authentication information in the URL hash.
+The Auth0 login redirects back to the SPA, appending user authentication information in the URL hash.
 
-The SPA loads and sees the authentication information in the URL hash. It extracts it (as `access_token` and `id_token`) and knows the user is logged in. It parses the `id_token` and displays user information used by the SPA.
+The SPA loads and sees the authentication information in the URL hash. The `parseHash` call extracts both tokens (`access_token` and `id_token`) from the hash, validates the `id_token`, and knows the user is logged in.
+
+The SPA then parses the `id_token` and displays the user information available to the SPA.
 
 Click the "Call API" button. The SPA will send a request with the `access_token` in the `Authorization` header.
 
@@ -67,7 +69,7 @@ There's a number of settings that need to be coordinated to get authorization wo
    1) Set `AUTH0_DOMAIN` to your Auth0 Domain (under your Auth0 client settings).
       - this setting tells the Function App authentication code which Auth0 account to use.
    1) Set `AUTH0_AUDIENCE` to your Azure Functions URL (in the Azure Functions overview).
-      - this setting tells the Function App authentication code that they are the target audience for the `access_token`.
+      - this setting tells the Function App authentication code that it is the target audience for the `access_token`.
 1) In your Azure Functions CORS settings, add the domain portion of your GH Pages URL (under your GitHub repository settings).
    - this setting tells your Function App that it should receive requests from the SPA.
 1) Create an Auth0 API, with `Identifier` set to your Azure Functions URL (in the Azure Functions overview).
