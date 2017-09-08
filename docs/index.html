@@ -39,7 +39,7 @@
             webAuth.parseHash(function(err, authResult) {
                 if (authResult && authResult.accessToken) {
                     window.location.hash = '';
-                    access_token = authResult.access_token;
+                    access_token = authResult.accessToken;
                     $('#results').append('<div>Logged in!</div>');
                 } else if (err) {
                     console.log(err);
