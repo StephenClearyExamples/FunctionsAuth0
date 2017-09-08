@@ -22,19 +22,21 @@ namespace FunctionApp
                 // The "token" is a SecurityToken that can be used to invoke services on the part of the user. E.g., create a Google Calendar event on the user's calendar.
                 var (user, token) = await req.AuthenticateAsync(log);
 
-                // Dump the claims details in the user 
-                log.Info("User authenticated as " + user.Identity.Name);
-                foreach (var claim in user.Claims)
-                    log.Info($"Claim `{claim.Type}` is `{claim.Value}`");
+                // Dump the claims details in the user
+                foreach (var identity in user.Identities)
+                {
+                    log.Info("User authenticated as " + identity.Name);
+                    foreach (var claim in identity.Claims)
+                        log.Info($"Claim `{claim.Type}` is `{claim.Value}`");
+                }
 
                 // Return the user details to the calling app.
-                var result = user.Claims.Select(x => new { type = x.Type, value = x.Value }).ToList();
-
-                return req.CreateResponse(HttpStatusCode.OK, new
+                var result = user.Identities.Select(x => new
                 {
-                    name = user.Identity.Name,
-                    claims = result,
-                });
+                    name = x.Name,
+                    claims = x.Claims.Select(c => new { type = c.Type, value = c.Value }).ToList(),
+                }).ToList();
+                return req.CreateResponse(HttpStatusCode.OK, result);
             }
             catch (ExpectedException ex)
             {
