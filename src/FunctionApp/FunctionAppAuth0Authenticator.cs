@@ -18,6 +18,14 @@ namespace FunctionApp
         // I'm using PublicationOnly so that exceptions during creation are retried on the next execution.
         private static readonly Lazy<Auth0Authenticator> Authenticator = new Lazy<Auth0Authenticator>(() => new Auth0Authenticator(Constants.Auth0Domain, new [] { Constants.Audience, Constants.ClientId }));
 
+        /// <summary>
+        /// Authenticates the user via an "Authentication: Bearer {token}" header in an HTTP request message, and also authenticates any "X-Additional-Token: {token}" headers.
+        /// Returns a user principal containing claims from the token(s) and a token that can be used to perform actions on behalf of the user.
+        /// Throws an exception if any of the tokens fail to authenticate or if the Authentication header is missing or malformed.
+        /// This method has an asynchronous signature, but usually completes synchronously.
+        /// </summary>
+        /// <param name="request">The HTTP request.</param>
+        /// <param name="log">A log used to write the authentication failure to.</param>
         public static async Task<(ClaimsPrincipal User, SecurityToken ValidatedToken)> AuthenticateAsync(this HttpRequestMessage request, TraceWriter log)
         {
             var authenticator = Authenticator.Value;
