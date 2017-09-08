@@ -16,17 +16,15 @@ Click the "Call API" button. The SPA will send a request without the `Authorizat
 
 Click the "Login" button. The SPA will redirect to an Auth0-hosted login page, where you can authorize using social media accounts.
 
-> Note: There are lots of options on how to log someone in via Auth0. It doesn't have to be an Auth0-hosted login page, and in fact most SPAs would not chose this option; they would use [Lock](https://auth0.com/docs/libraries/lock) instead.
+> Note: There are lots of options on how to log someone in via Auth0. It doesn't have to be an Auth0-hosted login page, SPAs may prefer to use [Lock](https://auth0.com/docs/libraries/lock) instead.
 
 The Auth0 login redirects back to the SPA, this time appending user authentication information in the URL hash.
 
-The SPA loads and sees the authentication information in the URL hash. It extracts it (as `access_token` and `id_token`) and knows the user is logged in.
+The SPA loads and sees the authentication information in the URL hash. It extracts it (as `access_token` and `id_token`) and knows the user is logged in. It parses the `id_token` and displays user information used by the SPA.
 
-Click the "Call API" button. The SPA will send a request with the `access_token` in the `Authorization` header and the `id_token` in the `X-Additional-Token` header.
+Click the "Call API" button. The SPA will send a request with the `access_token` in the `Authorization` header.
 
-> Note: You may not want to pass the `id_token` to your backend. It makes sense to do so only if you own the client (i.e., you control the client's secret key on Auth0).
-
-The Azure Function will authorize the user and return the details of the claims it can see in those token(s).
+The Azure Function will authorize the user and return the details of the claims it can see in its token. The `access_token` is usually minimal, containing only enough information to identify the user and make requests on behalf of them.
 
 # How It Works (Server Side)
 
@@ -39,12 +37,9 @@ This behaves as follows:
 1. The `Authorization: Bearer {access_token}` header is parsed and the `access_token` is validated.
 1. A `SecurityToken` is created by parsing the `access_token`. This is what is returned as `token` in the code above, and can be used to authenticate actions against other APIs (e.g., creating a Google Calendar event for a user).
 1. A `ClaimsPrincipal` is created with a single `ClaimsIdentity` that contains all the claims from that `access_token`.
-1. Any `X-Additional-Token: {id_token}` headers are parsed and the `id_token`s are validated.
-1. For each `id_token` present, a `ClaimsIdentity` is created that contains all the claims from that `id_token`, and that `ClaimsIdentity` is added to the `ClaimsPrincipal`.
-   - Note: If you don't want to accept `id_token`s, you can just remove all the code dealing with the `X-Additional-Token` header.
-1. The resulting `ClaimsPrincipal` (containing one identity for each token) and the `SecurityToken` (the parsed `access_token`) are returned.
+1. The resulting `ClaimsPrincipal` (containing one identity for the `access_token`) and the `SecurityToken` (the parsed `access_token`) are returned.
 
-You can then examine the claims and take action accordingly. This sample Azure Function just returns the claims for each identity as JSON.
+You can then examine the claims and take action accordingly. This sample Azure Function just returns the claims as JSON.
 
 If there are any authentication errors at all, an exception is raised (and logged), and the Azure Function returns a `403`.
 
@@ -73,8 +68,6 @@ There's a number of settings that need to be coordinated to get authorization wo
       - this setting tells the Function App authentication code which Auth0 account to use.
    1) Set `AUTH0_AUDIENCE` to your Azure Functions URL (in the Azure Functions overview).
       - this setting tells the Function App authentication code that they are the target audience for the `access_token`.
-   1) Set `AUTH0_CLIENT_ID` to your Auth0 Client ID (under your Auth0 client settings).
-      - this setting tells the Function App authentication code that it can also accept `id_token`s targeting the SPA.
 1) In your Azure Functions CORS settings, add the domain portion of your GH Pages URL (under your GitHub repository settings).
    - this setting tells your Function App that it should receive requests from the SPA.
 1) Create an Auth0 API, with `Identifier` set to your Azure Functions URL (in the Azure Functions overview).

@@ -18,22 +18,17 @@ namespace FunctionApp
             {
                 log.Info("C# HTTP trigger function processed a request.");
 
-                // The "user" returned here is an actual ClaimsIdentity with the claims that were in the access_token (and id_token, if present).
+                // The "user" returned here is an actual ClaimsIdentity with the claims that were in the access_token.
                 // The "token" is a SecurityToken that can be used to invoke services on the part of the user. E.g., create a Google Calendar event on the user's calendar.
                 var (user, token) = await req.AuthenticateAsync(log);
 
                 // Dump the claims details in the user
-                foreach (var identity in user.Identities)
-                {
-                    log.Info("User authenticated");
-                    foreach (var claim in identity.Claims)
-                        log.Info($"Claim `{claim.Type}` is `{claim.Value}`");
-                }
+                log.Info("User authenticated");
+                foreach (var claim in user.Claims)
+                    log.Info($"Claim `{claim.Type}` is `{claim.Value}`");
 
                 // Return the user details to the calling app.
-                var result = user.Identities.Select(x =>
-                    x.Claims.Select(c => new { type = c.Type, value = c.Value }).ToList()
-                ).ToList();
+                var result = user.Claims.Select(c => new { type = c.Type, value = c.Value }).ToList();
                 return req.CreateResponse(HttpStatusCode.OK, result);
             }
             catch (ExpectedException ex)

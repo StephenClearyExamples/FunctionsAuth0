@@ -16,10 +16,10 @@ namespace FunctionApp
     {
         // I'm using a Lazy here just so that exceptions on startup are in the scope of a function execution.
         // I'm using PublicationOnly so that exceptions during creation are retried on the next execution.
-        private static readonly Lazy<Auth0Authenticator> Authenticator = new Lazy<Auth0Authenticator>(() => new Auth0Authenticator(Constants.Auth0Domain, new [] { Constants.Audience, Constants.ClientId }));
+        private static readonly Lazy<Auth0Authenticator> Authenticator = new Lazy<Auth0Authenticator>(() => new Auth0Authenticator(Constants.Auth0Domain, new [] { Constants.Audience }));
 
         /// <summary>
-        /// Authenticates the user via an "Authentication: Bearer {token}" header in an HTTP request message, and also authenticates any "X-Additional-Token: {token}" headers.
+        /// Authenticates the user via an "Authentication: Bearer {token}" header in an HTTP request message.
         /// Returns a user principal containing claims from the token(s) and a token that can be used to perform actions on behalf of the user.
         /// Throws an exception if any of the tokens fail to authenticate or if the Authentication header is missing or malformed.
         /// This method has an asynchronous signature, but usually completes synchronously.
@@ -31,16 +31,7 @@ namespace FunctionApp
             var authenticator = Authenticator.Value;
             try
             {
-                var result = await authenticator.AuthenticateAsync(request);
-
-                // If we have any additional tokens, then authenticate them and merge those identities into our principal.
-                if (request.Headers.TryGetValues("X-Additional-Token", out var values))
-                {
-                    var extraTokenResults = await Task.WhenAll(values.Select(v => authenticator.AuthenticateAsync(v)));
-                    result.User.AddIdentities(extraTokenResults.SelectMany(x => x.User.Identities));
-                }
-
-                return result;
+                return await authenticator.AuthenticateAsync(request);
             }
             catch (Exception ex)
             {
