@@ -31,7 +31,7 @@ public sealed class Auth0Authenticator
         var config = await _manager.GetConfigurationAsync(cancellationToken).ConfigureAwait(false);
         var validationParameters = new TokenValidationParameters
         {
-            ValidIssuer = _auth0domain,
+            ValidIssuer = $"https://{_auth0domain}/",
             ValidAudience = _audience,
             ValidateIssuerSigningKey = true,
             IssuerSigningKeys = config.SigningKeys,
