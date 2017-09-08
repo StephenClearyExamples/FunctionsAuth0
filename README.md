@@ -18,7 +18,7 @@ Click the "Login" button. The SPA will redirect to an Auth0-hosted login page, w
 
 > Note: There are lots of options on how to log someone in via Auth0. It doesn't have to be an Auth0-hosted login page. In particular, SPAs may choose to use [Lock](https://auth0.com/docs/libraries/lock) instead.
 
-The Auth0 login redirects back to the SPA, this time appending user authentication information in the URL hash.
+The Auth0 login redirects back to the SPA, appending user authentication information in the URL hash.
 
 The SPA loads and sees the authentication information in the URL hash. It extracts it (as `access_token` and `id_token`) and knows the user is logged in.
 
