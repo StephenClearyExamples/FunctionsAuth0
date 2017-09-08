@@ -13,13 +13,15 @@ public sealed class Auth0Authenticator
 {
     private readonly string _auth0domain;
     private readonly string _audience;
+    private readonly string _clientId;
     private readonly ConfigurationManager<OpenIdConnectConfiguration> _manager;
     private readonly JwtSecurityTokenHandler _handler;
 
-    public Auth0Authenticator(string auth0Domain, string audience)
+    public Auth0Authenticator(string auth0Domain, string audience, string clientId)
     {
         _auth0domain = auth0Domain;
         _audience = audience;
+        _clientId = clientId;
         _manager = new ConfigurationManager<OpenIdConnectConfiguration>($"https://{auth0Domain}/.well-known/openid-configuration", new OpenIdConnectConfigurationRetriever());
         _handler = new JwtSecurityTokenHandler();
     }
@@ -32,7 +34,7 @@ public sealed class Auth0Authenticator
         var validationParameters = new TokenValidationParameters
         {
             ValidIssuer = $"https://{_auth0domain}/",
-            ValidAudience = _audience,
+            ValidAudiences = new [] { _audience, _clientId },
             ValidateIssuerSigningKey = true,
             IssuerSigningKeys = config.SigningKeys,
         };

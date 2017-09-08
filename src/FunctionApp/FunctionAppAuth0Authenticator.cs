@@ -15,7 +15,7 @@ namespace FunctionApp
     {
         // I'm using a Lazy here just so that exceptions on startup are in the scope of a function execution.
         // I'm using PublicationOnly so that exceptions during creation are retried on the next execution.
-        private static readonly Lazy<Auth0Authenticator> Authenticator = new Lazy<Auth0Authenticator>(() => new Auth0Authenticator(Constants.Auth0Domain, Constants.Audience));
+        private static readonly Lazy<Auth0Authenticator> Authenticator = new Lazy<Auth0Authenticator>(() => new Auth0Authenticator(Constants.Auth0Domain, Constants.Audience, Constants.ClientId));
 
         public static async Task<ClaimsPrincipal> AuthenticateAsync(this HttpRequestMessage request, TraceWriter log)
         {
