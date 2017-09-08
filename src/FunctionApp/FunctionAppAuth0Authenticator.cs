@@ -25,15 +25,11 @@ namespace FunctionApp
             {
                 var result = await authenticator.AuthenticateAsync(request);
 
-                // If we also have an id_token, then authenticate it and merge the claims into our principal.
-                if (request.Headers.TryGetValues("X-Id-Token", out var values))
+                // If we have any additional tokens, then authenticate them and merge those identities into our principal.
+                if (request.Headers.TryGetValues("X-Additional-Token", out var values))
                 {
-                    foreach (var value in values)
-                    {
-                        var idTokenResult = await authenticator.AuthenticateAsync(value);
-                        result.User.AddIdentity((ClaimsIdentity) idTokenResult.User.Identity);
-                        //MergeClaims(result.User, idTokenResult.User);
-                    }
+                    var extraTokenResults = await Task.WhenAll(values.Select(v => authenticator.AuthenticateAsync(v)));
+                    result.User.AddIdentities(extraTokenResults.SelectMany(x => x.User.Identities));
                 }
 
                 return result;
@@ -44,20 +40,5 @@ namespace FunctionApp
                 throw new ExpectedException(HttpStatusCode.Forbidden);
             }
         }
-
-        //private static void MergeClaims(ClaimsPrincipal primary, ClaimsPrincipal additional)
-        //{
-        //    foreach (var claim in additional.Claims)
-        //    {
-        //        // Claims in the "primary" principal take precedence.
-        //        var primaryClaim = primary.FindFirst(claim.Type);
-        //        if (primaryClaim != null)
-        //        {
-        //            if (primaryClaim.Value != claim.Value)
-        //                ((ClaimsIdentity)primary.Identity).
-        //            continue;
-        //        }
-        //    }
-        //}
     }
 }

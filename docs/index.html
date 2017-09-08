@@ -70,7 +70,7 @@
                     // If you have clients with their own keys, then you should *only* take the access_token in your API and then
                     //   use the access_token to call https://%AUTH0_DOMAIN%/userinfo to get the additional info.
                     // This example has a client under our control, so we just pass id_token directly to the API to avoid the extra call.
-                    headers.append('X-Id-Token', id_token); // 'X-Id-Token' isn't any kind of standard or common practice; it's just something I made up.
+                    headers.append('X-Additional-Token', id_token); // 'X-Additional-Token' isn't any kind of standard or common practice; it's just something I made up.
                 }
                 fetch(FUNCTIONS_URL + 'api/hello', { headers: headers })
                     .then(function (response) {
