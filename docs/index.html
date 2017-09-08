@@ -84,6 +84,9 @@
                 if (access_token) {
                     // The access_token is the appropriate way to authenticate with the API.
                     headers.append('Authorization', 'Bearer ' + access_token);
+                    $('#results').append('<div>Calling API with access token...</div>');
+                } else {
+                    $('#results').append('<div>Calling API without access token...</div>');
                 }
                 fetch(FUNCTIONS_URL + 'api/hello', { headers: headers })
                     .then(function (response) {
