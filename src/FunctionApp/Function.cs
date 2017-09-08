@@ -26,7 +26,7 @@ namespace FunctionApp
                     log.Info($"Claim `{claim.Type}` is `{claim.Value}`");
 
                 // Return the user details to the calling app.
-                var result = string.Join("\n", user.Claims.Select(x => $"Claim `{x.Type}` is `{x.Value}`"));
+                var result = user.Claims.Select(x => new { type = x.Type, value = x.Value }).ToList();
 
                 return req.CreateResponse(HttpStatusCode.OK, result);
             }
