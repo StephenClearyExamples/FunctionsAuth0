@@ -22,7 +22,7 @@ The Auth0 login redirects back to the SPA, appending user authentication informa
 
 The SPA loads and sees the authentication information in the URL hash. It extracts it (as `access_token` and `id_token`) and knows the user is logged in.
 
-> Note: This simple SPA is not validating the tokens. It just assumes that the user is logged in when those tokens are present. A production solution should validate the tokens in the SPA before considering the user "logged in".
+> Note: This simple SPA is not validating the tokens. It just assumes that the user is logged in when those tokens are present. A SPA should validate the tokens before considering the user "logged in".
 
 Click the "Call API" button. The SPA will send a request with the `access_token` in the `Authorization` header and the `id_token` in the `X-Additional-Token` header.
 
