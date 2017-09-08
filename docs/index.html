@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Auth0 for Azure Functions!</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script src="https://cdn.auth0.com/js/auth0/8.8/auth0.min.js"></script>
 </head>
@@ -20,6 +21,7 @@
         var AUTH0_DOMAIN = 'stephenclearytba.auth0.com'; // Copied from client settings on Auth0 dashboard.
         var AUTH0_CLIENT_ID = 'H21JFEgGqDy6cyrkD5WvnzfFnJ1iTgDr'; // Copied from client settings on Auth0 dashboard.
         var AUTH0_CALLBACK_URL = 'https://stephenclearyexamples.github.io/FunctionsAuth0/'; // Copied from GH Pages settings on GitHub.
+        var FUNCTIONS_URL = 'https://stephenclearyauth0.azurewebsites.net/'; // Copied from Azure Functions settings.
 
         var access_token; // Normally would be stored in local storage; this simple example just uses a var so you logout when you refresh.
 
@@ -33,13 +35,7 @@
                 scope: 'openid'
             });
 
-            var loginBtn = $('#btn-login');
-
-            loginBtn.click(function(e) {
-                e.preventDefault();
-                webAuth.authorize();
-            });
-
+            // Display our current login status; if there's an access token in the URL hash, then we've been logged in.
             webAuth.parseHash(function(err, authResult) {
                 if (authResult && authResult.accessToken) {
                     window.location.hash = '';
@@ -51,6 +47,32 @@
                 } else {
                     $('#results').append('<div>Not logged in.</div>');
                 }
+            });
+
+            // The login button authorizes with auth0.
+            // auth0 will redirect back to this page and append an access token in the URL hash.
+            $('#btn-login').click(function(e) {
+                e.preventDefault();
+                webAuth.authorize();
+            });
+            
+            // The api button calls our Azure Functions API and displays the results.
+            $('#btn-call').click(function(e) {
+                e.preventDefault();
+                fetch(FUNCTIONS_URL + 'api/hello')
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.ok) {
+                            $('#results').append('<div>API called OK!</div>');
+                            response.text().then(function (result) {
+                                $('#results').append($('<div/>').text(result));
+                            });
+                        } else {
+                            $('#results').append('<div>API call failed</div>');
+                            $('#results').append('<div>Code: ' + response.status + '</div>');
+                            $('#results').append('<div>Message: ' + response.statusText + '</div>');
+                        }
+                    });
             });
         });
     </script>
