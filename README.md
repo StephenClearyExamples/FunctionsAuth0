@@ -20,7 +20,7 @@ Click the "Login" button. The SPA will redirect to an Auth0-hosted login page, w
 
 The Auth0 login redirects back to the SPA, appending user authentication information in the URL hash.
 
-The SPA loads and sees the authentication information in the URL hash. It extracts it (as `access_token` and `id_token`) and knows the user is logged in.
+The SPA loads and sees the authentication information in the URL hash. The `parseHash` call extracts both tokens (`access_token` and `id_token`) from the hash, validates the `id_token`, and knows the user is logged in.
 
 Click the "Call API" button. The SPA will send a request with the `access_token` in the `Authorization` header and the `id_token` in the `X-Additional-Token` header.
 
