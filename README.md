@@ -72,7 +72,7 @@ There's a number of settings that need to be coordinated to get authorization wo
    1) Set `AUTH0_DOMAIN` to your Auth0 Domain (under your Auth0 client settings).
       - this setting tells the Function App authentication code which Auth0 account to use.
    1) Set `AUTH0_AUDIENCE` to your Azure Functions URL (in the Azure Functions overview).
-      - this setting tells the Function App authentication code that they are the target audience for the `access_token`.
+      - this setting tells the Function App authentication code that it is the target audience for the `access_token`.
    1) Set `AUTH0_CLIENT_ID` to your Auth0 Client ID (under your Auth0 client settings).
       - this setting tells the Function App authentication code that it can also accept `id_token`s targeting the SPA.
 1) In your Azure Functions CORS settings, add the domain portion of your GH Pages URL (under your GitHub repository settings).
