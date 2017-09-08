@@ -4,11 +4,13 @@ Using Auth0 to authenticate an HTTP-triggered C# class library Azure Function
 
 # How It Works (Client Side)
 
+[Follow along!](https://stephenclearyexamples.github.io/FunctionsAuth0/)
+
 The single HTML page under `docs/index.html` acts like a SPA. A super-simple one.
 
 When it first loads, it checks the hash fragment of the URL. There isn't any, so it knows the user is not logged in.
 
-> Note: Real-world SPAs will store its user tokens in local storage. This super-simple SPA deliberately does not, so every time you refresh the page, you'll be logged out. It's a feature. ;)
+> Note: Real-world SPAs will store their user tokens in local storage. This super-simple SPA deliberately does not, so every time you refresh the page, you'll be logged out. It's a feature. ;)
 
 Click the "Call API" button. The SPA will send a request without the `Authorization` header to the Azure Function. The Function will reject the call as unauthorized (`403`).
 
