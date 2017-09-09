@@ -18,7 +18,7 @@ namespace FunctionApp
             {
                 log.Info("C# HTTP trigger function processed a request.");
 
-                // The "user" returned here is an actual ClaimsIdentity with the claims that were in the access_token.
+                // The "user" returned here is an actual ClaimsPrincipal with the claims that were in the access_token.
                 // The "token" is a SecurityToken that can be used to invoke services on the part of the user. E.g., create a Google Calendar event on the user's calendar.
                 var (user, token) = await req.AuthenticateAsync(log);
 
