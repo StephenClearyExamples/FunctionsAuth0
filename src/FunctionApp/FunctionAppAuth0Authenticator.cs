@@ -36,7 +36,7 @@ namespace FunctionApp
             catch (Exception ex)
             {
                 log.Error("Authorization failed", ex);
-                throw new ExpectedException(HttpStatusCode.Forbidden);
+                throw new AuthenticationExpectedException();
             }
         }
     }
