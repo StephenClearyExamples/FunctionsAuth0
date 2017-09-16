@@ -21,6 +21,7 @@
     <div>
     <button id="btn-call">Call API</button>
     <button id="btn-login">Login</button>
+    <button id="btn-call-advanced">Call Advanced API</button>
     </div>
 
     <div id="results">
@@ -103,6 +104,44 @@
                                     table.append(tr);
                                 });
                                 $('#results').append(table);
+                            });
+                        } else {
+                            $('#results').append('<div>API call failed</div>');
+                            $('#results').append('<div>Code: ' + response.status + '</div>');
+                            $('#results').append('<div>Message: ' + response.statusText + '</div>');
+                        }
+                    });
+            });
+
+            // The advanced api button calls our Azure Functions API and displays the results.
+            $('#btn-call-advanced').click(function(e) {
+                e.preventDefault();
+                var headers = new Headers();
+                if (access_token) {
+                    // The access_token is the appropriate way to authenticate with the API.
+                    headers.append('Authorization', 'Bearer ' + access_token);
+                    $('#results').append('<div>Calling API with access token...</div>');
+                } else {
+                    $('#results').append('<div>Calling API without access token...</div>');
+                }
+                fetch(FUNCTIONS_URL + 'api/advanced', { headers: headers })
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.ok) {
+                            $('#results').append('<div>API called OK!</div>');
+                            response.json().then(function (results) {
+                                console.log(results);
+                                $('#results').append('<div>Claims:</div>');
+                                var table = $('<table/>');
+                                results.claims.forEach(function (claim) {
+                                    var tr = $('<tr/>');
+                                    tr.append($('<td/>').text(claim.type));
+                                    tr.append($('<td/>').text(claim.value));
+                                    table.append(tr);
+                                });
+                                $('#results').append(table);
+                                $('#results').append('<div>Auth0 Userinfo:</div>');
+                                $('#results').append('<div/>').text(JSON.stringify(results.userinfo));
                             });
                         } else {
                             $('#results').append('<div>API call failed</div>');
