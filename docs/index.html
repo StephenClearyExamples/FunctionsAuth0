@@ -141,7 +141,7 @@
                                 });
                                 $('#results').append(table);
                                 $('#results').append('<div>Auth0 Userinfo:</div>');
-                                $('#results').append('<div/>').text(JSON.stringify(results.userinfo));
+                                $('#results').append($('<div/>').text(JSON.stringify(results.userinfo)));
                             });
                         } else {
                             $('#results').append('<div>API call failed</div>');
