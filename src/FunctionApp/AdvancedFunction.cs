@@ -17,7 +17,7 @@ namespace FunctionApp
     {
         private static readonly HttpClient HttpClient = new HttpClient();
 
-        [FunctionName("Function")]
+        [FunctionName("FunctionAdvanced")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "advanced")]HttpRequestMessage req, TraceWriter log)
         {
             try

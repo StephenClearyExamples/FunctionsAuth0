@@ -11,7 +11,7 @@ namespace FunctionApp
 {
     public static class Function
     {
-        [FunctionName("Function")]
+        [FunctionName("FunctionHello")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "hello")]HttpRequestMessage req, TraceWriter log)
         {
             try
