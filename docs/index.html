@@ -1,156 +1,171 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Auth0 for Azure Functions!</title>
-  <style>
+  <head>
+    <meta charset="utf-8" />
+    <title>Auth0 for Azure Functions!</title>
+    <style>
       table {
-          border: 1px solid;
+        border: 1px solid;
       }
       td {
-          padding: 7px;
+        padding: 7px;
       }
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-  <script src="https://cdn.auth0.com/js/auth0/8.8/auth0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@2.2.0/build/jwt-decode.min.js"></script>
-</head>
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdn.auth0.com/js/auth0/8.8/auth0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@2.2.0/build/jwt-decode.min.js"></script>
+  </head>
 
-<body>
+  <body>
     <div>
-    <button id="btn-call">Call API</button>
-    <button id="btn-login">Login</button>
-    <button id="btn-call-advanced">Call Advanced API</button>
+      <button id="btn-call">Call API</button>
+      <button id="btn-login">Login</button>
+      <button id="btn-call-advanced">Call Advanced API</button>
     </div>
 
-    <div id="results">
-    </div>
+    <div id="results"></div>
 
     <script>
-        var AUTH0_DOMAIN = 'stephenclearytba.auth0.com'; // Copied from client settings on Auth0 dashboard.
-        var AUTH0_CLIENT_ID = 'H21JFEgGqDy6cyrkD5WvnzfFnJ1iTgDr'; // Copied from client settings on Auth0 dashboard.
-        var AUTH0_CALLBACK_URL = 'https://stephenclearyexamples.github.io/FunctionsAuth0/'; // Copied from GH Pages settings on GitHub.
-        var FUNCTIONS_URL = 'https://stephenclearyauth0.azurewebsites.net/'; // Copied from Azure Functions settings.
+      var AUTH0_DOMAIN = "boelte.auth0.com"; // Copied from client settings on Auth0 dashboard.
+      var AUTH0_CLIENT_ID = "XhBKQhbemk9sOVqvOfVD7xg2sUR5f1Vn"; // Copied from client settings on Auth0 dashboard.
+      var AUTH0_CALLBACK_URL = "https://bnewcomb.github.io/FunctionsAuth0/"; // Copied from GH Pages settings on GitHub.
+      var FUNCTIONS_URL = "https://showcaseapi.azurewebsites.net/"; // Copied from Azure Functions settings.
 
-        var access_token, id_token; // Normally would be stored in local storage; this simple example just uses vars so you logout when you refresh.
+      var access_token, id_token; // Normally would be stored in local storage; this simple example just uses vars so you logout when you refresh.
 
-        $('document').ready(function() {
-            var webAuth = new auth0.WebAuth({
-                domain: AUTH0_DOMAIN, // which Auth0 account this we authenticate with
-                clientID: AUTH0_CLIENT_ID, // this web page's client id (the audience for the id_token)
-                audience: FUNCTIONS_URL, // the API's identifier (the audience for the access_token)
-                redirectUri: AUTH0_CALLBACK_URL, // where the authentication will return to - in this example, it returns to this same page
-                responseType: 'token id_token', // request both access_token ("token") and id_token
-                scope: 'openid profile email' // include common properties
-            });
-
-            // Display our current login status; if there's a tokens in the URL hash, then we've been logged in.
-            webAuth.parseHash(function(err, authResult) {
-                if (authResult && authResult.accessToken && authResult.idToken) {
-                    window.location.hash = '';
-                    access_token = authResult.accessToken;
-                    id_token = authResult.idToken;
-                    $('#results').append('<div>Logged in!</div>');
-
-                    // UI apps use the id_token to customize the UI immediately.
-                    var decoded = jwt_decode(id_token);
-                    var table = $('<table/>');
-                    for (var key in decoded) {
-                        var tr = $('<tr/>');
-                        tr.append($('<td/>').text(key));
-                        tr.append($('<td/>').text(decoded[key]));
-                        table.append(tr);
-                    }
-                    $('#results').append(table);
-                } else if (err) {
-                    console.log(err);
-                    $('#results').append('<div>Error ' + err.error + '</div>');
-                } else {
-                    $('#results').append('<div>Not logged in.</div>');
-                }
-            });
-
-            // The login button authorizes with auth0.
-            // auth0 will redirect back to this page and append an access token in the URL hash.
-            $('#btn-login').click(function(e) {
-                e.preventDefault();
-                webAuth.authorize();
-            });
-            
-            // The api button calls our Azure Functions API and displays the results.
-            $('#btn-call').click(function(e) {
-                e.preventDefault();
-                var headers = new Headers();
-                if (access_token) {
-                    // The access_token is the appropriate way to authenticate with the API.
-                    headers.append('Authorization', 'Bearer ' + access_token);
-                    $('#results').append('<div>Calling API with access token...</div>');
-                } else {
-                    $('#results').append('<div>Calling API without access token...</div>');
-                }
-                fetch(FUNCTIONS_URL + 'api/hello', { headers: headers })
-                    .then(function (response) {
-                        console.log(response);
-                        if (response.ok) {
-                            $('#results').append('<div>API called OK!</div>');
-                            response.json().then(function (results) {
-                                console.log(results);
-                                var table = $('<table/>');
-                                results.forEach(function (claim) {
-                                    var tr = $('<tr/>');
-                                    tr.append($('<td/>').text(claim.type));
-                                    tr.append($('<td/>').text(claim.value));
-                                    table.append(tr);
-                                });
-                                $('#results').append(table);
-                            });
-                        } else {
-                            $('#results').append('<div>API call failed</div>');
-                            $('#results').append('<div>Code: ' + response.status + '</div>');
-                            $('#results').append('<div>Message: ' + response.statusText + '</div>');
-                        }
-                    });
-            });
-
-            // The advanced api button calls our Azure Functions API and displays the results.
-            $('#btn-call-advanced').click(function(e) {
-                e.preventDefault();
-                var headers = new Headers();
-                if (access_token) {
-                    // The access_token is the appropriate way to authenticate with the API.
-                    headers.append('Authorization', 'Bearer ' + access_token);
-                    $('#results').append('<div>Calling API with access token...</div>');
-                } else {
-                    $('#results').append('<div>Calling API without access token...</div>');
-                }
-                fetch(FUNCTIONS_URL + 'api/advanced', { headers: headers })
-                    .then(function (response) {
-                        console.log(response);
-                        if (response.ok) {
-                            $('#results').append('<div>API called OK!</div>');
-                            response.json().then(function (results) {
-                                console.log(results);
-                                $('#results').append('<div>Claims:</div>');
-                                var table = $('<table/>');
-                                results.claims.forEach(function (claim) {
-                                    var tr = $('<tr/>');
-                                    tr.append($('<td/>').text(claim.type));
-                                    tr.append($('<td/>').text(claim.value));
-                                    table.append(tr);
-                                });
-                                $('#results').append(table);
-                                $('#results').append('<div>Auth0 Userinfo:</div>');
-                                $('#results').append($('<div/>').text(JSON.stringify(results.userinfo)));
-                            });
-                        } else {
-                            $('#results').append('<div>API call failed</div>');
-                            $('#results').append('<div>Code: ' + response.status + '</div>');
-                            $('#results').append('<div>Message: ' + response.statusText + '</div>');
-                        }
-                    });
-            });
+      $("document").ready(function() {
+        var webAuth = new auth0.WebAuth({
+          domain: AUTH0_DOMAIN, // which Auth0 account this we authenticate with
+          clientID: AUTH0_CLIENT_ID, // this web page's client id (the audience for the id_token)
+          audience: FUNCTIONS_URL, // the API's identifier (the audience for the access_token)
+          redirectUri: AUTH0_CALLBACK_URL, // where the authentication will return to - in this example, it returns to this same page
+          responseType: "token id_token", // request both access_token ("token") and id_token
+          scope: "openid profile email" // include common properties
         });
+
+        // Display our current login status; if there's a tokens in the URL hash, then we've been logged in.
+        webAuth.parseHash(function(err, authResult) {
+          if (authResult && authResult.accessToken && authResult.idToken) {
+            window.location.hash = "";
+            access_token = authResult.accessToken;
+            id_token = authResult.idToken;
+            $("#results").append("<div>Logged in!</div>");
+
+            // UI apps use the id_token to customize the UI immediately.
+            var decoded = jwt_decode(id_token);
+            var table = $("<table/>");
+            for (var key in decoded) {
+              var tr = $("<tr/>");
+              tr.append($("<td/>").text(key));
+              tr.append($("<td/>").text(decoded[key]));
+              table.append(tr);
+            }
+            $("#results").append(table);
+          } else if (err) {
+            console.log(err);
+            $("#results").append("<div>Error " + err.error + "</div>");
+          } else {
+            $("#results").append("<div>Not logged in.</div>");
+          }
+        });
+
+        // The login button authorizes with auth0.
+        // auth0 will redirect back to this page and append an access token in the URL hash.
+        $("#btn-login").click(function(e) {
+          e.preventDefault();
+          webAuth.authorize();
+        });
+
+        // The api button calls our Azure Functions API and displays the results.
+        $("#btn-call").click(function(e) {
+          e.preventDefault();
+          var headers = new Headers();
+          if (access_token) {
+            // The access_token is the appropriate way to authenticate with the API.
+            headers.append("Authorization", "Bearer " + access_token);
+            $("#results").append("<div>Calling API with access token...</div>");
+          } else {
+            $("#results").append(
+              "<div>Calling API without access token...</div>"
+            );
+          }
+          fetch(FUNCTIONS_URL + "api/hello", { headers: headers }).then(
+            function(response) {
+              console.log(response);
+              if (response.ok) {
+                $("#results").append("<div>API called OK!</div>");
+                response.json().then(function(results) {
+                  console.log(results);
+                  var table = $("<table/>");
+                  results.forEach(function(claim) {
+                    var tr = $("<tr/>");
+                    tr.append($("<td/>").text(claim.type));
+                    tr.append($("<td/>").text(claim.value));
+                    table.append(tr);
+                  });
+                  $("#results").append(table);
+                });
+              } else {
+                $("#results").append("<div>API call failed</div>");
+                $("#results").append(
+                  "<div>Code: " + response.status + "</div>"
+                );
+                $("#results").append(
+                  "<div>Message: " + response.statusText + "</div>"
+                );
+              }
+            }
+          );
+        });
+
+        // The advanced api button calls our Azure Functions API and displays the results.
+        $("#btn-call-advanced").click(function(e) {
+          e.preventDefault();
+          var headers = new Headers();
+          if (access_token) {
+            // The access_token is the appropriate way to authenticate with the API.
+            headers.append("Authorization", "Bearer " + access_token);
+            $("#results").append("<div>Calling API with access token...</div>");
+          } else {
+            $("#results").append(
+              "<div>Calling API without access token...</div>"
+            );
+          }
+          fetch(FUNCTIONS_URL + "api/advanced", { headers: headers }).then(
+            function(response) {
+              console.log(response);
+              if (response.ok) {
+                $("#results").append("<div>API called OK!</div>");
+                response.json().then(function(results) {
+                  console.log(results);
+                  $("#results").append("<div>Claims:</div>");
+                  var table = $("<table/>");
+                  results.claims.forEach(function(claim) {
+                    var tr = $("<tr/>");
+                    tr.append($("<td/>").text(claim.type));
+                    tr.append($("<td/>").text(claim.value));
+                    table.append(tr);
+                  });
+                  $("#results").append(table);
+                  $("#results").append("<div>Auth0 Userinfo:</div>");
+                  $("#results").append(
+                    $("<div/>").text(JSON.stringify(results.userinfo))
+                  );
+                });
+              } else {
+                $("#results").append("<div>API call failed</div>");
+                $("#results").append(
+                  "<div>Code: " + response.status + "</div>"
+                );
+                $("#results").append(
+                  "<div>Message: " + response.statusText + "</div>"
+                );
+              }
+            }
+          );
+        });
+      });
     </script>
-</body>
+  </body>
 </html>
